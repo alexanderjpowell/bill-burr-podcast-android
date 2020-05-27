@@ -10,8 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
+        android:background="@color/darkThemeSurface"
         android:orientation="vertical">
-        <Button
+
+        <!--<Button
             android:id="@+id/button_expand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,15 +22,8 @@
             android:id="@+id/button_collapse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="collapse" />
-        <TextView
-            android:id="@+id/text_view_state"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="State"
-            android:textColor="@android:color/black"
-            android:textSize="30sp" />
+            android:text="collapse" />-->
+
     </LinearLayout>
 
     <LinearLayout
@@ -42,13 +37,34 @@
         android:background="@drawable/rounded_dialog"
         android:padding="16dp">
 
-        <TextView
+        <LinearLayout
             android:id="@+id/preview"
             android:visibility="gone"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Preview"
-            android:textSize="16sp" />
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/podcast_name_preview_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Monday Morning Podcast"
+                android:textSize="16sp"
+                android:textColor="@color/white"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/preview_play_pause_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_pause_circle_filled_white_24"
+                android:onClick="playPauseOnClickPreview"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/main"
@@ -57,26 +73,42 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
-            
-            <ImageView
-                android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:src="@drawable/mmp"
-                android:layout_margin="15dp" />
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="4dp"
+                android:background="@color/white"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="5dp"
+                android:layout_margin="15dp" >
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/mmp" />
+
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Monday May 25, 2020"
                 android:textColor="@color/white"
-                android:textSize="25sp" />
+                android:textSize="25sp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="6dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Monday Morning Podcast"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:layout_marginBottom="10dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -89,7 +121,7 @@
                     android:id="@+id/rewind_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="18dp"
+                    android:layout_marginEnd="50dp"
                     android:src="@drawable/baseline_replay_30_white_36"
                     android:onClick="rewindOnClick" />
 
@@ -104,7 +136,7 @@
                     android:id="@+id/fast_forward_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="18dp"
+                    android:layout_marginStart="50dp"
                     android:src="@drawable/baseline_forward_30_white_36"
                     android:onClick="fastForwardOnClick"/>
 
@@ -118,7 +150,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp" >
 
                 <TextView
                     android:id="@+id/current_duration_text_view"

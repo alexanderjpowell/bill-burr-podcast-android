@@ -18,9 +18,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 public class MainActivity extends AppCompatActivity {
 
     private BottomSheetBehavior mBottomSheetBehavior;
-    private TextView mTextViewState, preview, currentDurationTextView, remainingDurationTextView;
-    private ImageView playPauseButton;
-    private LinearLayout main;
+    private TextView currentDurationTextView, remainingDurationTextView;
+    private ImageView playPauseButton, previewPlayPauseButton;
+    private LinearLayout preview, main;
     private SeekBar seekBar;
     private MediaPlayer mediaPlayer;
     private Handler mHandler;
@@ -35,22 +35,22 @@ public class MainActivity extends AppCompatActivity {
 
         View bottomSheet = findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        mTextViewState = findViewById(R.id.text_view_state);
 
         mHandler = new Handler();
 
-        Button buttonExpand = findViewById(R.id.button_expand);
-        Button buttonCollapse = findViewById(R.id.button_collapse);
+        //Button buttonExpand = findViewById(R.id.button_expand);
+        //Button buttonCollapse = findViewById(R.id.button_collapse);
 
         currentDurationTextView = findViewById(R.id.current_duration_text_view);
         remainingDurationTextView = findViewById(R.id.remaining_duration_text_view);
         playPauseButton = findViewById(R.id.play_pause_button);
+        previewPlayPauseButton = findViewById(R.id.preview_play_pause_button);
         seekBar = findViewById(R.id.seek_bar);
 
         preview = findViewById(R.id.preview);
         main = findViewById(R.id.main);
 
-        buttonExpand.setOnClickListener(new View.OnClickListener() {
+        /*buttonExpand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
-        });
+        });*/
 
         mBottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -70,30 +70,30 @@ public class MainActivity extends AppCompatActivity {
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         preview.setVisibility(View.VISIBLE);
                         main.setVisibility(View.GONE);
-                        mTextViewState.setText("Collapsed");
+                        //mTextViewState.setText("Collapsed");
                         break;
                     case BottomSheetBehavior.STATE_EXPANDED:
                         preview.setVisibility(View.GONE);
                         main.setVisibility(View.VISIBLE);
-                        mTextViewState.setText("Expanded");
+                        //mTextViewState.setText("Expanded");
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
-                        mTextViewState.setText("Dragging...");
+                        //mTextViewState.setText("Dragging...");
                         break;
                     case BottomSheetBehavior.STATE_HIDDEN:
-                        mTextViewState.setText("Hidden");
+                        //mTextViewState.setText("Hidden");
                         break;
                     case BottomSheetBehavior.STATE_SETTLING:
-                        mTextViewState.setText("Settling...");
+                        //mTextViewState.setText("Settling...");
                         break;
                     case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        mTextViewState.setText("Half Expanded");
+                        //mTextViewState.setText("Half Expanded");
                         break;
                 }
             }
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                mTextViewState.setText("Sliding...");
+                //mTextViewState.setText("Sliding...");
             }
         });
 
@@ -111,9 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 public void onPrepared(MediaPlayer mp) {
                     mediaPlayer.start();
                     duration = mediaPlayer.getDuration() / 1000;
-                    //String lengthSeconds = Integer.toString(mediaPlayer.getDuration() / 1000);
-                    //Toast.makeText(getApplicationContext(), "Duration: " + lengthSeconds, Toast.LENGTH_LONG).show();
-                    //remainingDurationTextView.setText(lengthSeconds);
                     initializeSeekBar();
                 }
             });
@@ -171,6 +168,10 @@ public class MainActivity extends AppCompatActivity {
             mediaPlayer.start();
             playPauseButton.setImageResource(R.drawable.baseline_pause_circle_filled_white_48);
         }
+    }
+
+    public void playPauseOnClickPreview(View view) {
+        Toast.makeText(getApplicationContext(), "clicked", Toast.LENGTH_SHORT).show();
     }
 
     public void rewindOnClick(View view) {
