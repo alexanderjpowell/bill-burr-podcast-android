@@ -4,5 +4,6 @@
         <item name="colorPrimaryDark">@color/darkThemeSurface</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:listDivider">@drawable/recycler_view_divider</item>
     </style>
 </resources>

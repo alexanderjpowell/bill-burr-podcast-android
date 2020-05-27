@@ -14,8 +14,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.social.alexanderpowell.billburrpodcast.dummy.DummyContent;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
     private BottomSheetBehavior mBottomSheetBehavior;
     private TextView currentDurationTextView, remainingDurationTextView;
@@ -190,5 +191,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mediaPlayer.seekTo(duration * 1000);
         }
+    }
+
+    @Override
+    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+
     }
 }
