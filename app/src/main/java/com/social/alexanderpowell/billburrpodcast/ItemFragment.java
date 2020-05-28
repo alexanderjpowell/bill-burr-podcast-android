@@ -66,6 +66,8 @@ public class ItemFragment extends Fragment {
             recyclerView.setLayoutManager(mLayoutManager);
             recyclerView.setAdapter(new MyItemRecyclerViewAdapter(DummyContent.ITEMS, mListener));
 
+            recyclerView.setNestedScrollingEnabled(false);
+
             DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), mLayoutManager.getOrientation());
             recyclerView.addItemDecoration(mDividerItemDecoration);
         }

@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">BillBurrPodcast</string>
     <string name="bottom_sheet_behavior">com.google.android.material.bottomsheet.BottomSheetBehavior</string>
+
+    <string name="play_text">Play</string>
+    <string name="save_text">Save to favorites</string>
+    <string name="podcast_name">Monday Morning Podcast</string>
+
+    <string name="notification_channel_name">default notification channel</string>
+    <string name="notification_channel_description">media player notification channel</string>
 </resources>

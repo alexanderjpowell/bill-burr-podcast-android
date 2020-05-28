@@ -1,15 +1,15 @@
 package com.social.alexanderpowell.billburrpodcast;
 
 import androidx.recyclerview.widget.RecyclerView;
-
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import android.widget.Toast;
+import com.google.android.material.chip.Chip;
 import com.social.alexanderpowell.billburrpodcast.ItemFragment.OnListFragmentInteractionListener;
 import com.social.alexanderpowell.billburrpodcast.dummy.DummyContent.DummyItem;
-
 import java.util.List;
 
 /**
@@ -22,6 +22,8 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     private final List<DummyItem> mValues;
     private final OnListFragmentInteractionListener mListener;
 
+    private Context context;
+
     public MyItemRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
@@ -29,7 +31,10 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_item, parent, false);
+        //
+        context = parent.getContext();
+        //
+        View view = LayoutInflater.from(context).inflate(R.layout.fragment_item, parent, false);
         return new ViewHolder(view);
     }
 
@@ -39,6 +44,8 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         holder.mIdView.setText(mValues.get(position).id);
         holder.mContentView.setText(mValues.get(position).content);
 
+
+
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,6 +53,16 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
                     mListener.onListFragmentInteraction(holder.mItem);
+                }
+            }
+        });
+
+        holder.mPlayChip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (null != mListener) {
+                    Toast.makeText(context, "Click", Toast.LENGTH_LONG).show();
+                    MainActivity.expandBottomSheet();
                 }
             }
         });
@@ -60,13 +77,17 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
+        public final Chip mPlayChip;
+        public final Chip mSaveChip;
         public DummyItem mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.item_number);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mIdView = view.findViewById(R.id.item_number);
+            mContentView = view.findViewById(R.id.content);
+            mPlayChip = view.findViewById(R.id.play_chip);
+            mSaveChip = view.findViewById(R.id.save_chip);
         }
 
         @Override

@@ -23,7 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
         android:textColor="@color/white"
         android:textSize="15sp"
         android:textAppearance="?attr/textAppearanceListItem" />
@@ -31,21 +30,29 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal">
 
         <com.google.android.material.chip.Chip
+            android:id="@+id/play_chip"
             style="@style/Widget.MaterialComponents.Chip.Action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
             app:chipIcon="@drawable/baseline_play_circle_filled_24"
-            android:text="Play"/>
+            android:text="@string/play_text" />
 
         <com.google.android.material.chip.Chip
+            android:id="@+id/save_chip"
             style="@style/Widget.MaterialComponents.Chip.Action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
             app:chipIcon="@drawable/baseline_favorite_24"
-            android:text="Save to favorites"/>
+            android:text="@string/save_text" />
 
     </LinearLayout>
     

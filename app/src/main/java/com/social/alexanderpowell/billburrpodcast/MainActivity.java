@@ -2,12 +2,23 @@ package com.social.alexanderpowell.billburrpodcast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -18,7 +29,8 @@ import com.social.alexanderpowell.billburrpodcast.dummy.DummyContent;
 
 public class MainActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
-    private BottomSheetBehavior mBottomSheetBehavior;
+    public static final String CHANNEL_ID = "ForegroundServiceChannel";
+
     private TextView currentDurationTextView, remainingDurationTextView;
     private ImageView playPauseButton, previewPlayPauseButton;
     private LinearLayout preview, main;
@@ -26,6 +38,11 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     private MediaPlayer mediaPlayer;
     private Handler mHandler;
     private Runnable mRunnable;
+    private static BottomSheetBehavior mBottomSheetBehavior;
+    private Context context;
+
+    private NotificationManagerCompat notificationManager;
+    private Notification notification;
 
     private int currentPosition, duration;
 
@@ -34,13 +51,14 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        context = getApplicationContext();
+
+        createNotificationChannel(context);
+
         View bottomSheet = findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-
+        //mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         mHandler = new Handler();
-
-        //Button buttonExpand = findViewById(R.id.button_expand);
-        //Button buttonCollapse = findViewById(R.id.button_collapse);
 
         currentDurationTextView = findViewById(R.id.current_duration_text_view);
         remainingDurationTextView = findViewById(R.id.remaining_duration_text_view);
@@ -51,19 +69,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         preview = findViewById(R.id.preview);
         main = findViewById(R.id.main);
 
-        /*buttonExpand.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            }
-        });
-        buttonCollapse.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            }
-        });*/
-
         mBottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -71,30 +76,23 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         preview.setVisibility(View.VISIBLE);
                         main.setVisibility(View.GONE);
-                        //mTextViewState.setText("Collapsed");
                         break;
                     case BottomSheetBehavior.STATE_EXPANDED:
                         preview.setVisibility(View.GONE);
                         main.setVisibility(View.VISIBLE);
-                        //mTextViewState.setText("Expanded");
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
-                        //mTextViewState.setText("Dragging...");
                         break;
                     case BottomSheetBehavior.STATE_HIDDEN:
-                        //mTextViewState.setText("Hidden");
                         break;
                     case BottomSheetBehavior.STATE_SETTLING:
-                        //mTextViewState.setText("Settling...");
                         break;
                     case BottomSheetBehavior.STATE_HALF_EXPANDED:
-                        //mTextViewState.setText("Half Expanded");
                         break;
                 }
             }
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                //mTextViewState.setText("Sliding...");
             }
         });
 
@@ -138,6 +136,38 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
             }
         });
+
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
+        ContextCompat.startForegroundService(this, serviceIntent);
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent, 0);
+        Bitmap albumArtBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mmp);
+        notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Foreground Service")
+                .setContentText("Foreground Service Example in Android")
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setSmallIcon(R.drawable.baseline_play_circle_filled_24)
+                .addAction(R.drawable.baseline_replay_30_24, "Previous", pendingIntent)
+                .addAction(R.drawable.baseline_play_circle_filled_24, "Previous", pendingIntent)
+                .addAction(R.drawable.baseline_forward_30_24, "Previous", pendingIntent)
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(0))
+                .setLargeIcon(albumArtBitmap)
+                .build();
+
+        notificationManager = NotificationManagerCompat.from(this);
+    }
+
+    public static void expandBottomSheet() {
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    public void stopService(View view) {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        stopService(serviceIntent);
     }
 
     private void initializeSeekBar() {
@@ -150,10 +180,10 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                     seekBar.setProgress(currentPosition);
                     setAudioStats();
                 }
-                mHandler.postDelayed(mRunnable,100);
+                mHandler.postDelayed(mRunnable,1000);
             }
         };
-        mHandler.postDelayed(mRunnable,100);
+        mHandler.postDelayed(mRunnable,1000);
     }
 
     private void setAudioStats() {
@@ -165,9 +195,22 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             playPauseButton.setImageResource(R.drawable.baseline_play_circle_filled_white_48);
+            // Stop service but keep displaying notification
+            Intent serviceIntent = new Intent(this, ForegroundService.class);
+            stopService(serviceIntent);
+            //
+            notificationManager.notify(1, notification);
+            //
         } else {
             mediaPlayer.start();
             playPauseButton.setImageResource(R.drawable.baseline_pause_circle_filled_white_48);
+            // restart the service and dismiss the notification
+            notificationManager.cancel(1);
+            //
+            Intent serviceIntent = new Intent(this, ForegroundService.class);
+            serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
+            ContextCompat.startForegroundService(this, serviceIntent);
+            //
         }
     }
 
@@ -196,5 +239,17 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     @Override
     public void onListFragmentInteraction(DummyContent.DummyItem item) {
 
+    }
+
+    public static void createNotificationChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = context.getString(R.string.notification_channel_name);
+            String description = context.getString(R.string.notification_channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }
