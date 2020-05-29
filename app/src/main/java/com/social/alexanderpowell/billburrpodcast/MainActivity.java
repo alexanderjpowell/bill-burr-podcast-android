@@ -98,9 +98,9 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        try {
-            String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"; // Short test mp3
-            //String url = "https://dts.podtrac.com/redirect.mp3/chtbl.com/track/9EE2G/pdst.fm/e/rss.art19.com/episodes/9fc0fc76-84b2-4fa0-9ef6-b736412d045b.mp3";
+        String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"; // Short test mp3
+        //String url = "https://dts.podtrac.com/redirect.mp3/chtbl.com/track/9EE2G/pdst.fm/e/rss.art19.com/episodes/9fc0fc76-84b2-4fa0-9ef6-b736412d045b.mp3";
+        /*try {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.setDataSource(url);
@@ -116,7 +116,10 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         } catch (Exception ex) {
             ex.printStackTrace();
             Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        }*/
+        //
+        //MediaManager mm = new MediaManager(url);
+        //
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -170,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         stopService(serviceIntent);
     }
 
-    private void initializeSeekBar() {
+    public void initializeSeekBar() {
         seekBar.setMax(duration);
         mRunnable = new Runnable() {
             @Override

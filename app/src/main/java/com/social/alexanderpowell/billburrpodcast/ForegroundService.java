@@ -6,13 +6,21 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-public class ForegroundService extends Service {
+public class ForegroundService extends Service implements MediaPlayer.OnPreparedListener {
 
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
+
+    private static final String ACTION_PLAY = "com.example.action.PLAY";
+
+    private MediaPlayer mediaPlayer = null;
 
     @Override
     public void onCreate() {
@@ -43,17 +51,39 @@ public class ForegroundService extends Service {
         startForeground(1, notification);
         //do heavy work on a background thread
         //stopSelf();
+
+        //
+        String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3";
+        if (intent.getAction().equals(ACTION_PLAY)) {
+            try {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.setDataSource(url);
+                mediaPlayer.setOnPreparedListener(this);
+                mediaPlayer.prepareAsync(); // prepare async to not block main thread
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
+        //
+
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (mediaPlayer != null) mediaPlayer.release();
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public void onPrepared(MediaPlayer player) {
+        player.start();
     }
 }
