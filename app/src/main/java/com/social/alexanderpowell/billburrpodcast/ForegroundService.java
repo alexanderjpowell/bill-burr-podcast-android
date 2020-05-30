@@ -10,14 +10,12 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.widget.Toast;
-
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 public class ForegroundService extends Service implements MediaPlayer.OnPreparedListener {
 
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
-
     private static final String ACTION_PLAY = "com.example.action.PLAY";
 
     private MediaPlayer mediaPlayer = null;
@@ -54,7 +52,7 @@ public class ForegroundService extends Service implements MediaPlayer.OnPrepared
 
         //
         String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3";
-        if (intent.getAction().equals(ACTION_PLAY)) {
+        //if (intent.getAction().equals(ACTION_PLAY)) {
             try {
                 mediaPlayer = new MediaPlayer();
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -65,7 +63,7 @@ public class ForegroundService extends Service implements MediaPlayer.OnPrepared
                 ex.printStackTrace();
                 Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
             }
-        }
+        //}
         //
 
         return START_NOT_STICKY;

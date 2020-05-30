@@ -9,8 +9,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -18,6 +20,12 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,10 +49,13 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     private static BottomSheetBehavior mBottomSheetBehavior;
     private Context context;
 
-    private NotificationManagerCompat notificationManager;
+    private NotificationManagerCompat mNotificationManager;
     private Notification notification;
 
     private int currentPosition, duration;
+
+    private MediaPlayerService player;
+    boolean serviceBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,8 +109,9 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"; // Short test mp3
+        //String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"; // Short test mp3
         //String url = "https://dts.podtrac.com/redirect.mp3/chtbl.com/track/9EE2G/pdst.fm/e/rss.art19.com/episodes/9fc0fc76-84b2-4fa0-9ef6-b736412d045b.mp3";
+        //String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
         /*try {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -140,9 +152,15 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             }
         });
 
-        Intent serviceIntent = new Intent(this, ForegroundService.class);
-        serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
-        ContextCompat.startForegroundService(this, serviceIntent);
+        String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
+        playAudio(url);
+
+        //Intent serviceIntent = new Intent(this, ForegroundService.class);
+        //serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
+        //ContextCompat.startForegroundService(this, serviceIntent);
+
+        //startService(serviceIntent);
+        //stopService(serviceIntent);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
@@ -161,17 +179,17 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                 .setLargeIcon(albumArtBitmap)
                 .build();
 
-        notificationManager = NotificationManagerCompat.from(this);
+        mNotificationManager = NotificationManagerCompat.from(this);
     }
 
     public static void expandBottomSheet() {
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
-    public void stopService(View view) {
+    /*public void stopService(View view) {
         Intent serviceIntent = new Intent(this, ForegroundService.class);
         stopService(serviceIntent);
-    }
+    }*/
 
     public void initializeSeekBar() {
         seekBar.setMax(duration);
@@ -194,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         remainingDurationTextView.setText(String.valueOf(duration));
     }
 
-    public void playPauseOnClick(View view) {
+    /*public void playPauseOnClick(View view) {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             playPauseButton.setImageResource(R.drawable.baseline_play_circle_filled_white_48);
@@ -202,20 +220,20 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             Intent serviceIntent = new Intent(this, ForegroundService.class);
             stopService(serviceIntent);
             //
-            notificationManager.notify(1, notification);
+            mNotificationManager.notify(1, notification);
             //
         } else {
             mediaPlayer.start();
             playPauseButton.setImageResource(R.drawable.baseline_pause_circle_filled_white_48);
             // restart the service and dismiss the notification
-            notificationManager.cancel(1);
+            mNotificationManager.cancel(1);
             //
             Intent serviceIntent = new Intent(this, ForegroundService.class);
             serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
             ContextCompat.startForegroundService(this, serviceIntent);
             //
         }
-    }
+    }*/
 
     public void playPauseOnClickPreview(View view) {
         Toast.makeText(getApplicationContext(), "clicked", Toast.LENGTH_SHORT).show();
@@ -253,6 +271,58 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             channel.setDescription(description);
             NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
+            player = binder.getService();
+            serviceBound = true;
+
+            Toast.makeText(MainActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceBound = false;
+        }
+    };
+
+    private void playAudio(String media) {
+        //Check is service is active
+        if (!serviceBound) {
+            Intent playerIntent = new Intent(this, MediaPlayerService.class);
+            playerIntent.putExtra("media", media);
+            startService(playerIntent);
+            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            //Service is active
+            //Send media with BroadcastReceiver
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean("ServiceState", serviceBound);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        serviceBound = savedInstanceState.getBoolean("ServiceState");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (serviceBound) {
+            unbindService(serviceConnection);
+            //service is active
+            player.stopSelf();
         }
     }
 }
