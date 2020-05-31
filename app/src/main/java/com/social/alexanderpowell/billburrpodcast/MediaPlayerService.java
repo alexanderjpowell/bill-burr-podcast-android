@@ -1,13 +1,16 @@
 package com.social.alexanderpowell.billburrpodcast;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -49,10 +52,29 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        // Perform one-time setup procedures
+
+        // Manage incoming phone calls during playback.
+        // Pause MediaPlayer on incoming call,
+        // Resume on hangup.
+        //callStateListener();
+        //ACTION_AUDIO_BECOMING_NOISY -- change in audio outputs -- BroadcastReceiver
+        //registerBecomingNoisyReceiver();
+        //Listen for new Audio to play -- BroadcastReceiver
+        registerPlayPauseBroadcast();
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
             //An audio file is passed to the service through putExtra();
             mediaFile = intent.getExtras().getString("media");
+            String action = intent.getStringExtra("action");
+            /*if (action.equals("pause")) {
+                pauseMedia();
+            }*/
         } catch (NullPointerException e) {
             stopSelf();
         }
@@ -62,6 +84,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             //Could not gain focus
             stopSelf();
         }
+
+        //Toast.makeText(getApplicationContext(), mediaFile, Toast.LENGTH_SHORT).show();
 
         if (mediaFile != null && mediaFile != "")
             initMediaPlayer();
@@ -82,7 +106,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        //Invoked when playback of a media source has completed.
         //Invoked when playback of a media source has completed.
         stopMedia();
         //stop the service
@@ -211,6 +234,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             mediaPlayer.release();
         }
         removeAudioFocus();
+    }
+
+    private BroadcastReceiver playPauseReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //Toast.makeText(getApplicationContext(), "Broadcast Received", Toast.LENGTH_SHORT).show();
+            if (mediaPlayer.isPlaying()) {
+                pauseMedia();
+            } else {
+                resumeMedia();
+            }
+        }
+    };
+
+    private void registerPlayPauseBroadcast() {
+        IntentFilter filter = new IntentFilter(MainActivity.Broadcast_PLAY_PAUSE);
+        registerReceiver(playPauseReceiver, filter);
     }
 
 }

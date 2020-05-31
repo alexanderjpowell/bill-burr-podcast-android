@@ -15,10 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name=".MediaPlayerService" />
-        <service
+        <!--<service
             android:name=".ForegroundService"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true"/>-->
         <activity
             android:name=".MainActivity">
             <intent-filter>

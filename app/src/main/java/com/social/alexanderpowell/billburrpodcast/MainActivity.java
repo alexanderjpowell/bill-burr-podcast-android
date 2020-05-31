@@ -39,11 +39,13 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
+    public static final String Broadcast_PLAY_PAUSE = "com.social.alexanderpowell.billburrpodcast.PLAY_PAUSE";
+
     private TextView currentDurationTextView, remainingDurationTextView;
     private ImageView playPauseButton, previewPlayPauseButton;
     private LinearLayout preview, main;
     private SeekBar seekBar;
-    private MediaPlayer mediaPlayer;
+    //private MediaPlayer mediaPlayer;
     private Handler mHandler;
     private Runnable mRunnable;
     private static BottomSheetBehavior mBottomSheetBehavior;
@@ -136,9 +138,9 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (mediaPlayer != null && b) {
-                    mediaPlayer.seekTo(i * 1000);
-                }
+                //if (mediaPlayer != null && b) {
+                    //mediaPlayer.seekTo(i * 1000);
+                //}
             }
 
             @Override
@@ -196,11 +198,11 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         mRunnable = new Runnable() {
             @Override
             public void run() {
-                if (mediaPlayer != null) {
-                    currentPosition = mediaPlayer.getCurrentPosition() / 1000;
-                    seekBar.setProgress(currentPosition);
-                    setAudioStats();
-                }
+                //if (mediaPlayer != null) {
+                    //currentPosition = mediaPlayer.getCurrentPosition() / 1000;
+                    //seekBar.setProgress(currentPosition);
+                    //setAudioStats();
+                //}
                 mHandler.postDelayed(mRunnable,1000);
             }
         };
@@ -210,6 +212,19 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     private void setAudioStats() {
         currentDurationTextView.setText(String.valueOf(currentPosition));
         remainingDurationTextView.setText(String.valueOf(duration));
+    }
+
+    public void playPauseOnClick(View view) {
+
+        Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
+        sendBroadcast(broadcastIntent);
+
+
+        /*Intent playerIntent = new Intent(this, MediaPlayerService.class);
+        String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
+        playerIntent.putExtra("media", "");
+        playerIntent.putExtra("action", "pause");
+        startService(playerIntent);*/
     }
 
     /*public void playPauseOnClick(View view) {
@@ -242,18 +257,18 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     public void rewindOnClick(View view) {
         int newPosition = currentPosition - 30;
         if (newPosition >= 0) {
-            mediaPlayer.seekTo(newPosition * 1000);
+            //mediaPlayer.seekTo(newPosition * 1000);
         } else {
-            mediaPlayer.seekTo(0);
+            //mediaPlayer.seekTo(0);
         }
     }
 
     public void fastForwardOnClick(View view) {
         int newPosition = currentPosition + 30;
         if (newPosition <= duration) {
-            mediaPlayer.seekTo(newPosition * 1000);
+            //mediaPlayer.seekTo(newPosition * 1000);
         } else {
-            mediaPlayer.seekTo(duration * 1000);
+            //mediaPlayer.seekTo(duration * 1000);
         }
     }
 
@@ -282,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             player = binder.getService();
             serviceBound = true;
 
-            Toast.makeText(MainActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
         }
 
         @Override
