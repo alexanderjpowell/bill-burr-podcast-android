@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -33,6 +34,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private String mediaFile;
     private int resumePosition;
     private AudioManager audioManager;
+
+    //
+    private Handler mHandler;
+    private Runnable mRunnable;
+    //
 
     // Binder given to clients
     private final IBinder iBinder = new LocalBinder();
@@ -73,6 +79,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         //registerBecomingNoisyReceiver();
         //Listen for new Audio to play -- BroadcastReceiver
         registerPlayPauseBroadcast();
+
+        /*mHandler = new Handler();
+        mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                //if (mediaPlayer != null) {
+                //currentPosition = mediaPlayer.getCurrentPosition() / 1000;
+                //seekBar.setProgress(currentPosition);
+                //setAudioStats();
+                //}
+                Toast.makeText(getApplicationContext(), "test", Toast.LENGTH_SHORT).show();
+                mHandler.postDelayed(mRunnable,1000);
+            }
+        };
+        mHandler.postDelayed(mRunnable,1000);*/
     }
 
     @Override
@@ -307,8 +328,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         registerReceiver(playPauseReceiver, filter);
     }
 
+    public Boolean audioIsPlaying() {
+        return mediaPlayer.isPlaying();
+    }
+
     public int getCurrentPositionn() {
         return mediaPlayer.getCurrentPosition();
     }
+
+    public String getStats() {return "";}
 
 }

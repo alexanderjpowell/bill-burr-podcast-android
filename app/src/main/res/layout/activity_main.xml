@@ -6,11 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <fragment
+    <!--<fragment
         android:id="@+id/headlines_fragment"
         android:name="com.social.alexanderpowell.billburrpodcast.ItemFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" />-->
 
     <!--<Button
         android:layout_width="wrap_content"

@@ -243,7 +243,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     }
 
     public void playPauseOnClick(View view) {
-
         Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
         broadcastIntent.putExtra("ACTION", "PLAY_PAUSE");
         sendBroadcast(broadcastIntent);
@@ -253,40 +252,18 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             //Log.d("MainActivity", String.valueOf(cur));
             //Toast.makeText(getApplicationContext(), String.valueOf(cur), Toast.LENGTH_SHORT).show();
         }
-
-        /*Intent playerIntent = new Intent(this, MediaPlayerService.class);
-        String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
-        playerIntent.putExtra("media", "");
-        playerIntent.putExtra("action", "pause");
-        startService(playerIntent);*/
     }
 
     public void rewindOnClick(View view) {
-
         Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
         broadcastIntent.putExtra("ACTION", "REWIND");
         sendBroadcast(broadcastIntent);
-
-        /*int newPosition = currentPosition - 30;
-        if (newPosition >= 0) {
-            //mediaPlayer.seekTo(newPosition * 1000);
-        } else {
-            //mediaPlayer.seekTo(0);
-        }*/
     }
 
     public void fastForwardOnClick(View view) {
-
         Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
         broadcastIntent.putExtra("ACTION", "FAST_FORWARD");
         sendBroadcast(broadcastIntent);
-
-        /*int newPosition = currentPosition + 30;
-        if (newPosition <= duration) {
-            //mediaPlayer.seekTo(newPosition * 1000);
-        } else {
-            //mediaPlayer.seekTo(duration * 1000);
-        }*/
     }
 
     @Override
@@ -313,8 +290,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
             player = binder.getService();
             serviceBound = true;
-
-            //Toast.makeText(MainActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
         }
 
         @Override
