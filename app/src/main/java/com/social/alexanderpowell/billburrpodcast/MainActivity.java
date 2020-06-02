@@ -26,6 +26,7 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -214,19 +215,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         remainingDurationTextView.setText(String.valueOf(duration));
     }
 
-    public void playPauseOnClick(View view) {
-
-        Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
-        sendBroadcast(broadcastIntent);
-
-
-        /*Intent playerIntent = new Intent(this, MediaPlayerService.class);
-        String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
-        playerIntent.putExtra("media", "");
-        playerIntent.putExtra("action", "pause");
-        startService(playerIntent);*/
-    }
-
     /*public void playPauseOnClick(View view) {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
@@ -254,22 +242,51 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         Toast.makeText(getApplicationContext(), "clicked", Toast.LENGTH_SHORT).show();
     }
 
+    public void playPauseOnClick(View view) {
+
+        Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
+        broadcastIntent.putExtra("ACTION", "PLAY_PAUSE");
+        sendBroadcast(broadcastIntent);
+
+        if (serviceBound) {
+            int cur = player.getCurrentPositionn();
+            //Log.d("MainActivity", String.valueOf(cur));
+            //Toast.makeText(getApplicationContext(), String.valueOf(cur), Toast.LENGTH_SHORT).show();
+        }
+
+        /*Intent playerIntent = new Intent(this, MediaPlayerService.class);
+        String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
+        playerIntent.putExtra("media", "");
+        playerIntent.putExtra("action", "pause");
+        startService(playerIntent);*/
+    }
+
     public void rewindOnClick(View view) {
-        int newPosition = currentPosition - 30;
+
+        Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
+        broadcastIntent.putExtra("ACTION", "REWIND");
+        sendBroadcast(broadcastIntent);
+
+        /*int newPosition = currentPosition - 30;
         if (newPosition >= 0) {
             //mediaPlayer.seekTo(newPosition * 1000);
         } else {
             //mediaPlayer.seekTo(0);
-        }
+        }*/
     }
 
     public void fastForwardOnClick(View view) {
-        int newPosition = currentPosition + 30;
+
+        Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
+        broadcastIntent.putExtra("ACTION", "FAST_FORWARD");
+        sendBroadcast(broadcastIntent);
+
+        /*int newPosition = currentPosition + 30;
         if (newPosition <= duration) {
             //mediaPlayer.seekTo(newPosition * 1000);
         } else {
             //mediaPlayer.seekTo(duration * 1000);
-        }
+        }*/
     }
 
     @Override

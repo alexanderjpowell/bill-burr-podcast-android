@@ -1,10 +1,14 @@
 package com.social.alexanderpowell.billburrpodcast;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
@@ -12,12 +16,17 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.core.app.NotificationCompat;
+
+import java.io.Console;
 import java.io.IOException;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
         MediaPlayer.OnInfoListener, MediaPlayer.OnBufferingUpdateListener,
         AudioManager.OnAudioFocusChangeListener {
+
+    public static final String CHANNEL_ID = "MediaPlayerServiceChannel";
 
     private MediaPlayer mediaPlayer;
     //path to the audio file
@@ -68,19 +77,39 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        // Build the notification
+        Bitmap albumArtBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mmp);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent, 0);
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentTitle("Foreground Service")
+                .setContentText("Notif Content")
+                .setSmallIcon(R.drawable.baseline_play_circle_filled_24)
+                .addAction(R.drawable.baseline_replay_30_24, "Previous", pendingIntent)
+                .addAction(R.drawable.baseline_play_circle_filled_24, "Previous", pendingIntent)
+                .addAction(R.drawable.baseline_forward_30_24, "Previous", pendingIntent)
+                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                        .setShowActionsInCompactView(0))
+                .setLargeIcon(albumArtBitmap)
+                .build();
+
+        //MainActivity.createNotificationChannel(getApplicationContext());
+        //startForeground(1, notification);
+        //
+
         try {
             //An audio file is passed to the service through putExtra();
             mediaFile = intent.getExtras().getString("media");
-            String action = intent.getStringExtra("action");
-            /*if (action.equals("pause")) {
-                pauseMedia();
-            }*/
+            //String action = intent.getStringExtra("action");
         } catch (NullPointerException e) {
             stopSelf();
         }
 
         //Request audio focus
-        if (requestAudioFocus() == false) {
+        if (!requestAudioFocus()) {
             //Could not gain focus
             stopSelf();
         }
@@ -226,6 +255,24 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
+    private void rewindMedia() {
+        int newPosition = mediaPlayer.getCurrentPosition() / 1000 - 30;
+        if (newPosition >= 0) {
+            mediaPlayer.seekTo(newPosition * 1000);
+        } else {
+            mediaPlayer.seekTo(0);
+        }
+    }
+
+    private void fastForwardMedia() {
+        int newPosition = mediaPlayer.getCurrentPosition() / 1000 + 30;
+        if (newPosition <= mediaPlayer.getDuration() / 1000) {
+            mediaPlayer.seekTo(newPosition * 1000);
+        } else {
+            mediaPlayer.seekTo(mediaPlayer.getDuration());
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -239,11 +286,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private BroadcastReceiver playPauseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //Toast.makeText(getApplicationContext(), "Broadcast Received", Toast.LENGTH_SHORT).show();
-            if (mediaPlayer.isPlaying()) {
-                pauseMedia();
-            } else {
-                resumeMedia();
+            String action = intent.getStringExtra("ACTION");
+            Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();
+            if (action.equals("PLAY_PAUSE")) {
+                if (mediaPlayer.isPlaying()) {
+                    pauseMedia();
+                } else {
+                    resumeMedia();
+                }
+            } else if (action.equals("REWIND")) {
+                rewindMedia();
+            } else if (action.equals("FAST_FORWARD")) {
+                fastForwardMedia();
             }
         }
     };
@@ -251,6 +305,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void registerPlayPauseBroadcast() {
         IntentFilter filter = new IntentFilter(MainActivity.Broadcast_PLAY_PAUSE);
         registerReceiver(playPauseReceiver, filter);
+    }
+
+    public int getCurrentPositionn() {
+        return mediaPlayer.getCurrentPosition();
     }
 
 }
