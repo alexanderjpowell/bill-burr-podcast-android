@@ -59,8 +59,10 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             @Override
             public void onClick(View view) {
                 if (null != mListener) {
-                    Toast.makeText(context, "Click", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(context, "Click", Toast.LENGTH_LONG).show();
                     MainActivity.expandBottomSheet();
+
+                    ((MainActivity)view.getContext()).playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
                 }
             }
         });

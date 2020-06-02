@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         context = getApplicationContext();
 
-        createNotificationChannel(context);
+        //createNotificationChannel(context);
 
         View bottomSheet = findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         });
 
         String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
-        playAudio(url);
+        //playAudio(url);
 
         //Intent serviceIntent = new Intent(this, ForegroundService.class);
         //serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
@@ -248,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         sendBroadcast(broadcastIntent);
 
         if (serviceBound) {
-            int cur = player.getCurrentPositionn();
+            int cur = player.getCurrentPosition();
             //Log.d("MainActivity", String.valueOf(cur));
             //Toast.makeText(getApplicationContext(), String.valueOf(cur), Toast.LENGTH_SHORT).show();
         }
@@ -298,16 +298,34 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         }
     };
 
-    private void playAudio(String media) {
+    public void playAudio(String media) {
         //Check is service is active
         if (!serviceBound) {
             Intent playerIntent = new Intent(this, MediaPlayerService.class);
             playerIntent.putExtra("media", media);
             startService(playerIntent);
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            //
+            mRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    int cur = player.getCurrentPosition() / 1000;
+                    int dur = player.getDuration() / 1000;
+                    seekBar.setProgress(cur);
+                    currentDurationTextView.setText(String.valueOf(cur));
+                    remainingDurationTextView.setText(String.valueOf(dur));
+                    mHandler.postDelayed(mRunnable,1000);
+                }
+            };
+            mHandler.postDelayed(mRunnable,1000);
+            //
         } else {
+            Toast.makeText(getApplicationContext(), "service already bound", Toast.LENGTH_SHORT).show();
             //Service is active
             //Send media with BroadcastReceiver
+            Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
+            broadcastIntent.putExtra("ACTION", "NEW_AUDIO_SOURCE");
+            sendBroadcast(broadcastIntent);
         }
     }
 

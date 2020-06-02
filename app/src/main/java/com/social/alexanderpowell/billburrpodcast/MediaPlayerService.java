@@ -1,6 +1,8 @@
 package com.social.alexanderpowell.billburrpodcast;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -12,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -100,6 +103,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         // Build the notification
+        createNotificationChannel(getApplicationContext());
         Bitmap albumArtBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mmp);
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
@@ -118,8 +122,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .build();
 
         //MainActivity.createNotificationChannel(getApplicationContext());
-        //startForeground(1, notification);
-        //
+        startForeground(1, notification);
 
         try {
             //An audio file is passed to the service through putExtra();
@@ -134,8 +137,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             //Could not gain focus
             stopSelf();
         }
-
-        //Toast.makeText(getApplicationContext(), mediaFile, Toast.LENGTH_SHORT).show();
 
         if (mediaFile != null && mediaFile != "")
             initMediaPlayer();
@@ -319,6 +320,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 rewindMedia();
             } else if (action.equals("FAST_FORWARD")) {
                 fastForwardMedia();
+            } else if (action.equals("NEW_AUDIO_SOURCE")) {
+                stopMedia();
+                mediaPlayer.reset();
+                initMediaPlayer();
             }
         }
     };
@@ -328,12 +333,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         registerReceiver(playPauseReceiver, filter);
     }
 
+    private void createNotificationChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = context.getString(R.string.notification_channel_name);
+            String description = context.getString(R.string.notification_channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
     public Boolean audioIsPlaying() {
         return mediaPlayer.isPlaying();
     }
 
-    public int getCurrentPositionn() {
+    public int getCurrentPosition() {
         return mediaPlayer.getCurrentPosition();
+    }
+
+    public int getDuration() {
+        return mediaPlayer.getDuration();
     }
 
     public String getStats() {return "";}
