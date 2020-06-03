@@ -115,26 +115,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         //String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"; // Short test mp3
         //String url = "https://dts.podtrac.com/redirect.mp3/chtbl.com/track/9EE2G/pdst.fm/e/rss.art19.com/episodes/9fc0fc76-84b2-4fa0-9ef6-b736412d045b.mp3";
         //String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
-        /*try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setDataSource(url);
-            mediaPlayer.prepareAsync();
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mediaPlayer.start();
-                    duration = mediaPlayer.getDuration() / 1000;
-                    initializeSeekBar();
-                }
-            });
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-        }*/
-        //
-        //MediaManager mm = new MediaManager(url);
-        //
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -157,13 +137,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
         //playAudio(url);
-
-        //Intent serviceIntent = new Intent(this, ForegroundService.class);
-        //serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
-        //ContextCompat.startForegroundService(this, serviceIntent);
-
-        //startService(serviceIntent);
-        //stopService(serviceIntent);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
@@ -237,10 +210,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             //
         }
     }*/
-
-    public void playPauseOnClickPreview(View view) {
-        Toast.makeText(getApplicationContext(), "clicked", Toast.LENGTH_SHORT).show();
-    }
 
     public void playPauseOnClick(View view) {
         Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
@@ -349,5 +318,15 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             //service is active
             player.stopSelf();
         }
+    }
+
+    public void bottomSheetPreviewOnClick(View view) {
+        if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+    }
+
+    public void playPauseOnClickPreview(View view) {
+        Toast.makeText(getApplicationContext(), "clicked", Toast.LENGTH_SHORT).show();
     }
 }

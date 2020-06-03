@@ -32,6 +32,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     public static final String CHANNEL_ID = "MediaPlayerServiceChannel";
 
+    private static final int NOTIFICATION_ID = 101;
+
     private MediaPlayer mediaPlayer;
     //path to the audio file
     private String mediaFile;
@@ -102,46 +104,61 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        // Build the notification
-        createNotificationChannel(getApplicationContext());
-        Bitmap albumArtBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mmp);
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, 0);
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setContentTitle("Foreground Service")
-                .setContentText("Notif Content")
-                .setSmallIcon(R.drawable.baseline_play_circle_filled_24)
-                .addAction(R.drawable.baseline_replay_30_24, "Previous", pendingIntent)
-                .addAction(R.drawable.baseline_play_circle_filled_24, "Previous", pendingIntent)
-                .addAction(R.drawable.baseline_forward_30_24, "Previous", pendingIntent)
-                .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(0))
-                .setLargeIcon(albumArtBitmap)
-                .build();
+        Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();
 
-        //MainActivity.createNotificationChannel(getApplicationContext());
-        startForeground(1, notification);
+        if (intent.getAction() == null) {
+            // Build the notification
+            createNotificationChannel(getApplicationContext());
+            Bitmap albumArtBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mmp);
+            Intent notificationIntent = new Intent(this, MediaPlayerService.class);
+            notificationIntent.setAction("NOTIFICATION_PLAY_PAUSE");
+            //PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+            PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setContentTitle("Foreground Service")
+                    .setContentText("Notification Content")
+                    .setContentInfo("Info")
+                    .setSmallIcon(R.drawable.baseline_play_circle_filled_24)
+                    .addAction(R.drawable.baseline_replay_30_24, "Previous", pendingIntent)
+                    .addAction(R.drawable.baseline_play_circle_filled_24, "Previous", pendingIntent)
+                    .addAction(R.drawable.baseline_forward_30_24, "Previous", pendingIntent)
+                    .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                            .setShowActionsInCompactView(1 /* #1: pause button */))
+                    .setLargeIcon(albumArtBitmap)
+                    .setShowWhen(false) // Hide timestamp
+                    .build();
 
-        try {
-            //An audio file is passed to the service through putExtra();
-            mediaFile = intent.getExtras().getString("media");
-            //String action = intent.getStringExtra("action");
-        } catch (NullPointerException e) {
-            stopSelf();
+            startForeground(NOTIFICATION_ID, notification);
+
+            try {
+                //An audio file is passed to the service through putExtra();
+                mediaFile = intent.getExtras().getString("media");
+                //String action = intent.getStringExtra("action");
+            } catch (NullPointerException e) {
+                stopSelf();
+            }
+
+            //Request audio focus
+            if (!requestAudioFocus()) {
+                //Could not gain focus
+                stopSelf();
+            }
+
+            if (mediaFile != null && mediaFile != "")
+                initMediaPlayer();
+
+            handleIncomingActions(intent);
+
+        } else if (intent.getAction().equals("NOTIFICATION_PLAY_PAUSE")) {
+            pauseMedia();
         }
-
-        //Request audio focus
-        if (!requestAudioFocus()) {
-            //Could not gain focus
-            stopSelf();
-        }
-
-        if (mediaFile != null && mediaFile != "")
-            initMediaPlayer();
-
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void handleIncomingActions(Intent playbackAction) {
+        //pause
+        //Toast.makeText(getApplicationContext(), "handleIncomingActions", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -309,7 +326,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getStringExtra("ACTION");
-            Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();
             if (action.equals("PLAY_PAUSE")) {
                 if (mediaPlayer.isPlaying()) {
                     pauseMedia();
@@ -324,6 +340,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 stopMedia();
                 mediaPlayer.reset();
                 initMediaPlayer();
+            } else {
+                Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();
             }
         }
     };

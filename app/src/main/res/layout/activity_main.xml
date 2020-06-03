@@ -35,10 +35,10 @@
 
             <LinearLayout
                 android:id="@+id/preview"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:onClick="bottomSheetPreviewOnClick">
 
                 <TextView
                     android:id="@+id/podcast_name_preview_text_view"
@@ -64,7 +64,6 @@
 
             <LinearLayout
                 android:id="@+id/main"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
