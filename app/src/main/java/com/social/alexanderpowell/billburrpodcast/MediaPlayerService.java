@@ -32,6 +32,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     public static final String CHANNEL_ID = "MediaPlayerServiceChannel";
 
+    private static final String NOTIFICATION_ACTION_PLAY_PAUSE = "com.social.alexanderpowell.billburrpodcast.NOTIFICATION_ACTION_PLAY_PAUSE";
+    private static final String NOTIFICATION_ACTION_REWIND = "com.social.alexanderpowell.billburrpodcast.NOTIFICATION_ACTION_REWIND";
+    private static final String NOTIFICATION_ACTION_FAST_FORWARD = "com.social.alexanderpowell.billburrpodcast.NOTIFICATION_ACTION_FAST_FORWARD";
+
     private static final int NOTIFICATION_ID = 101;
 
     private MediaPlayer mediaPlayer;
@@ -104,27 +108,33 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();
-
         if (intent.getAction() == null) {
-            // Build the notification
             createNotificationChannel(getApplicationContext());
             Bitmap albumArtBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mmp);
-            Intent notificationIntent = new Intent(this, MediaPlayerService.class);
-            notificationIntent.setAction("NOTIFICATION_PLAY_PAUSE");
-            //PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-            PendingIntent pendingIntent = PendingIntent.getService(this, 0, notificationIntent, 0);
+
+            Intent notificationIntent1 = new Intent(this, MediaPlayerService.class);
+            notificationIntent1.setAction(NOTIFICATION_ACTION_PLAY_PAUSE);
+            PendingIntent pendingIntentPlayPause = PendingIntent.getService(this, 0, notificationIntent1, 0);
+
+            Intent notificationIntent2 = new Intent(this, MediaPlayerService.class);
+            notificationIntent2.setAction(NOTIFICATION_ACTION_REWIND);
+            PendingIntent pendingIntentRewind = PendingIntent.getService(this, 0, notificationIntent2, 0);
+
+            Intent notificationIntent3 = new Intent(this, MediaPlayerService.class);
+            notificationIntent3.setAction(NOTIFICATION_ACTION_FAST_FORWARD);
+            PendingIntent pendingIntentFastForward = PendingIntent.getService(this, 0, notificationIntent3, 0);
+
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setContentTitle("Foreground Service")
                     .setContentText("Notification Content")
                     .setContentInfo("Info")
                     .setSmallIcon(R.drawable.baseline_play_circle_filled_24)
-                    .addAction(R.drawable.baseline_replay_30_24, "Previous", pendingIntent)
-                    .addAction(R.drawable.baseline_play_circle_filled_24, "Previous", pendingIntent)
-                    .addAction(R.drawable.baseline_forward_30_24, "Previous", pendingIntent)
+                    .addAction(R.drawable.baseline_replay_30_24, "Rewind", pendingIntentRewind)
+                    .addAction(R.drawable.baseline_play_circle_filled_24, "Play/Pause", pendingIntentPlayPause)
+                    .addAction(R.drawable.baseline_forward_30_24, "Fast Forward", pendingIntentFastForward)
                     .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
-                            .setShowActionsInCompactView(1 /* #1: pause button */))
+                            .setShowActionsInCompactView(0, 1, 2))
                     .setLargeIcon(albumArtBitmap)
                     .setShowWhen(false) // Hide timestamp
                     .build();
@@ -148,10 +158,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if (mediaFile != null && mediaFile != "")
                 initMediaPlayer();
 
-            handleIncomingActions(intent);
+            //handleIncomingActions(intent);
 
-        } else if (intent.getAction().equals("NOTIFICATION_PLAY_PAUSE")) {
-            pauseMedia();
+        } else if (intent.getAction().equals(NOTIFICATION_ACTION_PLAY_PAUSE)) {
+            if (mediaPlayer.isPlaying()) {
+                pauseMedia();
+            } else {
+                resumeMedia();
+            }
+        } else if (intent.getAction().equals(NOTIFICATION_ACTION_REWIND)) {
+            rewindMedia();
+        } else if (intent.getAction().equals(NOTIFICATION_ACTION_FAST_FORWARD)) {
+            fastForwardMedia();
         }
         return super.onStartCommand(intent, flags, startId);
     }

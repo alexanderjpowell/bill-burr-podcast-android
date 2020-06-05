@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,6 +28,7 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.util.Xml;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,6 +37,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.social.alexanderpowell.billburrpodcast.dummy.DummyContent;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
@@ -156,6 +170,44 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                 .build();
 
         mNotificationManager = NotificationManagerCompat.from(this);
+
+        /*Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //Toast.makeText(getApplicationContext(), "first", Toast.LENGTH_SHORT).show();
+                    URL urll = new URL("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
+                    HttpURLConnection conn = (HttpURLConnection) urll.openConnection();
+                    conn.setReadTimeout(10000);
+                    conn.setConnectTimeout(15000);
+                    conn.setRequestMethod("GET");
+                    conn.setDoInput(true);
+                    conn.connect();
+                    InputStream stream = conn.getInputStream();
+
+                    XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                    XmlPullParser myparser = factory.newPullParser();
+
+                    myparser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+                    myparser.setInput(stream, null);
+
+                    //
+                    String results = myparser.getText();
+                    Log.d("MainActivity", results);
+                    //Toast.makeText(getApplicationContext(), "test", Toast.LENGTH_SHORT).show();
+                    //
+
+                    stream.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Log.d("MainActivity", ex.getMessage());
+                    //Toast.makeText(getApplicationContext(), ex.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        thread.start();*/
+
+        new FetchFeedTask().execute((Void) null);
     }
 
     public static void expandBottomSheet() {
@@ -328,5 +380,238 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
     public void playPauseOnClickPreview(View view) {
         Toast.makeText(getApplicationContext(), "clicked", Toast.LENGTH_SHORT).show();
+    }
+
+    private enum RSSXMLTag {
+        TITLE, DESCRIPTION, DATE, IGNORETAG;
+    }
+
+    private class FetchFeedTask extends AsyncTask<Void, Void, Boolean> {
+
+        private String urlLink;
+        private RSSXMLTag currentTag;
+
+        @Override
+        protected void onPreExecute() {
+            //urlLink = "https://xkcd.com/rss.xml";
+            urlLink = "https://rss.art19.com/monday-morning-podcast";
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                URL url = new URL(urlLink);
+                InputStream inputStream = url.openConnection().getInputStream();
+                parseFeed(inputStream);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+
+        }
+
+        public List<RssFeedModel> parseFeed(InputStream inputStream) throws XmlPullParserException,
+                IOException {
+            String title = null;
+            String link = null;
+            String description = null;
+            String pubDate = null;
+            String guid = null;
+            boolean isItem = false;
+            List<RssFeedModel> items = new ArrayList<>();
+
+            try {
+                XmlPullParser xmlPullParser = Xml.newPullParser();
+                xmlPullParser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+                xmlPullParser.setInput(inputStream, null);
+
+                int eventType = xmlPullParser.getEventType();
+                int count = 0;
+                int quota = 200;
+                RssFeedModel rssFeedModel = null;
+                while (eventType != XmlPullParser.END_DOCUMENT && count < quota) {
+                    String name = xmlPullParser.getName();
+
+                    if (eventType == XmlPullParser.START_DOCUMENT) {
+
+                    } else if (eventType == XmlPullParser.START_TAG) {
+                        //Log.d("START_TAG", xmlPullParser.getName());
+                        if (xmlPullParser.getName().equals("item")) {
+                            rssFeedModel = new RssFeedModel();
+                            currentTag = RSSXMLTag.IGNORETAG;
+                        } else if (xmlPullParser.getName().equals("title")) {
+                            //Log.d("START_TAG", rssFeedModel.printModel());
+                            currentTag = RSSXMLTag.TITLE;
+                        } else if (xmlPullParser.getName().equals("description")) {
+                            currentTag = RSSXMLTag.DESCRIPTION;
+                        } else if (xmlPullParser.getName().equals("pubDate")) {
+                            currentTag = RSSXMLTag.DATE;
+                        }
+                    } else if (eventType == XmlPullParser.END_TAG) {
+                        //Log.d("END_TAG", xmlPullParser.getName());
+                        if (xmlPullParser.getName().equals("item")) {
+                            if (rssFeedModel != null) {
+                                Log.d("END_TAG", rssFeedModel.printModel());
+                            }
+                        } else {
+                            currentTag = RSSXMLTag.IGNORETAG;
+                        }
+                    } else if (eventType == XmlPullParser.TEXT) {
+                        String content = xmlPullParser.getText().trim();
+                        //Log.d("TEXT", content);
+                        if (rssFeedModel != null) {
+                            switch (currentTag) {
+                                case TITLE:
+                                    rssFeedModel.setTitle(content);
+                                    break;
+                                case DESCRIPTION:
+                                    rssFeedModel.setDescription(content);
+                                    break;
+                                case DATE:
+                                    rssFeedModel.setPubDate(content);
+                                    break;
+                            }
+                        }
+                    }
+                    eventType = xmlPullParser.next();
+                    count++;
+                }
+
+                /*xmlPullParser.nextTag();
+                int count = 0;
+                int quota = 1;
+                while (xmlPullParser.next() != XmlPullParser.END_DOCUMENT) {
+                //while (eventType != XmlPullParser.END_DOCUMENT) {
+
+                    int eventType = xmlPullParser.getEventType();
+
+                    String name = xmlPullParser.getName();
+                    if(name == null)
+                        continue;
+
+                    if(eventType == XmlPullParser.END_TAG) {
+                        if(name.equalsIgnoreCase("item")) {
+                            isItem = false;
+                        }
+                        continue;
+                    }
+
+                    if (eventType == XmlPullParser.START_TAG) {
+                        if(name.equalsIgnoreCase("item")) {
+                            count++;
+                            isItem = true;
+                            continue;
+                        }
+                    }
+
+                    //
+                    if (eventType == XmlPullParser.START_TAG && isItem) {
+                        //Log.d("MyXmlParser", xmlPullParser.getName());
+                        Log.d("MyXmlParser - TAG", name);
+                    }
+                    //
+                    //Log.d("MyXmlParser", "Parsing name ==> " + name);
+                    String result = "";
+                    if (xmlPullParser.next() == XmlPullParser.TEXT && isItem) {
+                    //if (xmlPullParser.getEventType() == XmlPullParser.TEXT && isItem) {
+                    //if (eventType == XmlPullParser.TEXT) {
+                        result = xmlPullParser.getText();
+                        Log.d("MyXmlParser - TEXT", result);
+                        Log.d("NAME", name);
+                        if (name.equals("enclosure")) {
+                            Log.d("url", "enclosure");
+                            Log.d("url", xmlPullParser.getAttributeValue(null, "url"));
+                            Log.d("url", xmlPullParser.getAttributeValue(0));
+                        }
+                        xmlPullParser.nextTag();
+                    }
+
+                    //if (name.equals("enclosure")) {
+
+                    //}
+
+                    /if (name.equalsIgnoreCase("title")) {
+                        title = result;
+                    } else if (name.equalsIgnoreCase("link")) {
+                        link = result;
+                    } else if (name.equalsIgnoreCase("description")) {
+                        description = result;
+                    } else if (name.equalsIgnoreCase("pubDate")) {
+                        pubDate = result;
+                    } else if (name.equalsIgnoreCase("guid")) {
+                        guid = result;
+                    }
+
+                    if (title != null && link != null && description != null) {
+                        if(isItem) {
+                            RssFeedModel item = new RssFeedModel(title, link, description, pubDate, guid);
+                            items.add(item);
+                            //Log.d("MainActivity", item.description);
+                        }
+                        else {
+                            //Log.d("MainActivity", description);
+                            //mFeedTitle = title;
+                            //mFeedLink = link;
+                            //mFeedDescription = description;
+                        }
+
+                        title = null;
+                        link = null;
+                        description = null;
+                        isItem = false;
+                    }/
+                    //count++;
+                    if (count > quota) {
+                        //break;
+                    }
+                    //eventType = xmlPullParser.next();
+                    //xmlPullParser.next();
+                }*/
+                return items;
+            } finally {
+                inputStream.close();
+            }
+        }
+    }
+
+    public class RssFeedModel {
+
+        public String title;
+        //public String link;
+        public String description;
+        public String pubDate;
+        //public String guid;
+
+        public RssFeedModel() {
+
+        }
+
+        public RssFeedModel(String title, String description, String pubDate) {
+            this.title = title;
+            //this.link = link;
+            this.description = description;
+            this.pubDate = pubDate;
+            //this.guid = guid;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public void setPubDate(String pubDate) {
+            this.pubDate = pubDate;
+        }
+
+        public String printModel() {
+            return this.title + " : " + this.description + " : " + this.pubDate;
+        }
     }
 }
