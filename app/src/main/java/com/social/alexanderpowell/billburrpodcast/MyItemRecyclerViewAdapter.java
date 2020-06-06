@@ -39,7 +39,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.mItem = mValues.get(position);
         holder.mIdView.setText(mValues.get(position).title);
         holder.mContentView.setText(mValues.get(position).description);
@@ -61,8 +61,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
                 if (null != mListener) {
                     //Toast.makeText(context, "Click", Toast.LENGTH_LONG).show();
                     MainActivity.expandBottomSheet();
-
-                    ((MainActivity)view.getContext()).playAudio("https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg");
+                    ((MainActivity)view.getContext()).playAudio(mValues.get(position).getUrl());
                 }
             }
         });

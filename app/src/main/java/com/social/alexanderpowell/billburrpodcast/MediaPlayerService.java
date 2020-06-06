@@ -357,6 +357,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } else if (action.equals("NEW_AUDIO_SOURCE")) {
                 stopMedia();
                 mediaPlayer.reset();
+                mediaFile = intent.getStringExtra("media");
                 initMediaPlayer();
             } else {
                 Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();

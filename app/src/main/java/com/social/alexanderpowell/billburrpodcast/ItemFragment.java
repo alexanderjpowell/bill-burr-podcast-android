@@ -182,7 +182,7 @@ public class ItemFragment extends Fragment {
 
                 int eventType = xmlPullParser.getEventType();
                 int count = 0;
-                int quota = 5;
+                int quota = 25;
                 RssFeedModel rssFeedModel = null;
                 while (eventType != XmlPullParser.END_DOCUMENT && count < quota) {
                     if (eventType == XmlPullParser.START_DOCUMENT) {
