@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.google.android.material.chip.Chip;
 import com.social.alexanderpowell.billburrpodcast.ItemFragment.OnListFragmentInteractionListener;
 import com.social.alexanderpowell.billburrpodcast.dummy.DummyContent.DummyItem;
@@ -41,8 +41,8 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.mIdView.setText(mValues.get(position).title);
+        holder.mContentView.setText(mValues.get(position).description);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override

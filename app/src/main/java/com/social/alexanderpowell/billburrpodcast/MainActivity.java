@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         });
         thread.start();*/
 
-        new FetchFeedTask().execute((Void) null);
+        //new FetchFeedTask().execute((Void) null);
     }
 
     public static void expandBottomSheet() {
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     }
 
     private enum RSSXMLTag {
-        TITLE, DESCRIPTION, DATE, IGNORETAG;
+        TITLE, DESCRIPTION, DATE, LINK, IGNORETAG;
     }
 
     private class FetchFeedTask extends AsyncTask<Void, Void, Boolean> {
@@ -402,7 +402,10 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             try {
                 URL url = new URL(urlLink);
                 InputStream inputStream = url.openConnection().getInputStream();
-                parseFeed(inputStream);
+                List<RssFeedModel> items = parseFeed(inputStream);
+                for (int i = 0; i < items.size(); i++) {
+                    Log.d("doInBackground", items.get(i).getLink());
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -416,12 +419,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         public List<RssFeedModel> parseFeed(InputStream inputStream) throws XmlPullParserException,
                 IOException {
-            String title = null;
-            String link = null;
-            String description = null;
-            String pubDate = null;
-            String guid = null;
-            boolean isItem = false;
             List<RssFeedModel> items = new ArrayList<>();
 
             try {
@@ -431,38 +428,37 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
                 int eventType = xmlPullParser.getEventType();
                 int count = 0;
-                int quota = 200;
+                int quota = 5;
                 RssFeedModel rssFeedModel = null;
                 while (eventType != XmlPullParser.END_DOCUMENT && count < quota) {
-                    String name = xmlPullParser.getName();
-
                     if (eventType == XmlPullParser.START_DOCUMENT) {
 
                     } else if (eventType == XmlPullParser.START_TAG) {
-                        //Log.d("START_TAG", xmlPullParser.getName());
                         if (xmlPullParser.getName().equals("item")) {
                             rssFeedModel = new RssFeedModel();
                             currentTag = RSSXMLTag.IGNORETAG;
                         } else if (xmlPullParser.getName().equals("title")) {
-                            //Log.d("START_TAG", rssFeedModel.printModel());
                             currentTag = RSSXMLTag.TITLE;
                         } else if (xmlPullParser.getName().equals("description")) {
                             currentTag = RSSXMLTag.DESCRIPTION;
                         } else if (xmlPullParser.getName().equals("pubDate")) {
                             currentTag = RSSXMLTag.DATE;
+                        } else if (xmlPullParser.getName().equals("enclosure")) {
+                            currentTag = RSSXMLTag.LINK;
+                            String link = xmlPullParser.getAttributeValue(null, "url");
+                            rssFeedModel.setLink(link);
                         }
                     } else if (eventType == XmlPullParser.END_TAG) {
-                        //Log.d("END_TAG", xmlPullParser.getName());
                         if (xmlPullParser.getName().equals("item")) {
                             if (rssFeedModel != null) {
-                                Log.d("END_TAG", rssFeedModel.printModel());
+                                items.add(rssFeedModel);
                             }
+                            count++;
                         } else {
                             currentTag = RSSXMLTag.IGNORETAG;
                         }
                     } else if (eventType == XmlPullParser.TEXT) {
                         String content = xmlPullParser.getText().trim();
-                        //Log.d("TEXT", content);
                         if (rssFeedModel != null) {
                             switch (currentTag) {
                                 case TITLE:
@@ -478,99 +474,8 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                         }
                     }
                     eventType = xmlPullParser.next();
-                    count++;
-                }
-
-                /*xmlPullParser.nextTag();
-                int count = 0;
-                int quota = 1;
-                while (xmlPullParser.next() != XmlPullParser.END_DOCUMENT) {
-                //while (eventType != XmlPullParser.END_DOCUMENT) {
-
-                    int eventType = xmlPullParser.getEventType();
-
-                    String name = xmlPullParser.getName();
-                    if(name == null)
-                        continue;
-
-                    if(eventType == XmlPullParser.END_TAG) {
-                        if(name.equalsIgnoreCase("item")) {
-                            isItem = false;
-                        }
-                        continue;
-                    }
-
-                    if (eventType == XmlPullParser.START_TAG) {
-                        if(name.equalsIgnoreCase("item")) {
-                            count++;
-                            isItem = true;
-                            continue;
-                        }
-                    }
-
-                    //
-                    if (eventType == XmlPullParser.START_TAG && isItem) {
-                        //Log.d("MyXmlParser", xmlPullParser.getName());
-                        Log.d("MyXmlParser - TAG", name);
-                    }
-                    //
-                    //Log.d("MyXmlParser", "Parsing name ==> " + name);
-                    String result = "";
-                    if (xmlPullParser.next() == XmlPullParser.TEXT && isItem) {
-                    //if (xmlPullParser.getEventType() == XmlPullParser.TEXT && isItem) {
-                    //if (eventType == XmlPullParser.TEXT) {
-                        result = xmlPullParser.getText();
-                        Log.d("MyXmlParser - TEXT", result);
-                        Log.d("NAME", name);
-                        if (name.equals("enclosure")) {
-                            Log.d("url", "enclosure");
-                            Log.d("url", xmlPullParser.getAttributeValue(null, "url"));
-                            Log.d("url", xmlPullParser.getAttributeValue(0));
-                        }
-                        xmlPullParser.nextTag();
-                    }
-
-                    //if (name.equals("enclosure")) {
-
-                    //}
-
-                    /if (name.equalsIgnoreCase("title")) {
-                        title = result;
-                    } else if (name.equalsIgnoreCase("link")) {
-                        link = result;
-                    } else if (name.equalsIgnoreCase("description")) {
-                        description = result;
-                    } else if (name.equalsIgnoreCase("pubDate")) {
-                        pubDate = result;
-                    } else if (name.equalsIgnoreCase("guid")) {
-                        guid = result;
-                    }
-
-                    if (title != null && link != null && description != null) {
-                        if(isItem) {
-                            RssFeedModel item = new RssFeedModel(title, link, description, pubDate, guid);
-                            items.add(item);
-                            //Log.d("MainActivity", item.description);
-                        }
-                        else {
-                            //Log.d("MainActivity", description);
-                            //mFeedTitle = title;
-                            //mFeedLink = link;
-                            //mFeedDescription = description;
-                        }
-
-                        title = null;
-                        link = null;
-                        description = null;
-                        isItem = false;
-                    }/
                     //count++;
-                    if (count > quota) {
-                        //break;
-                    }
-                    //eventType = xmlPullParser.next();
-                    //xmlPullParser.next();
-                }*/
+                }
                 return items;
             } finally {
                 inputStream.close();
@@ -581,25 +486,31 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     public class RssFeedModel {
 
         public String title;
-        //public String link;
+        public String link;
         public String description;
         public String pubDate;
         //public String guid;
 
-        public RssFeedModel() {
+        public RssFeedModel() { }
 
-        }
-
-        public RssFeedModel(String title, String description, String pubDate) {
+        /*public RssFeedModel(String title, String link, String description, String pubDate) {
             this.title = title;
-            //this.link = link;
+            this.link = link;
             this.description = description;
             this.pubDate = pubDate;
             //this.guid = guid;
-        }
+        }*/
 
         public void setTitle(String title) {
             this.title = title;
+        }
+
+        public void setLink(String link) {
+            this.link = link;
+        }
+
+        public String getLink() {
+            return this.link;
         }
 
         public void setDescription(String description) {
