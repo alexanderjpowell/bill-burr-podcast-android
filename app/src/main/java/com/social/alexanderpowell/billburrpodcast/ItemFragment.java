@@ -150,9 +150,9 @@ public class ItemFragment extends Fragment {
                 URL url = new URL(urlLink);
                 InputStream inputStream = url.openConnection().getInputStream();
                 List<RssFeedModel> items = parseFeed(inputStream);
-                for (int i = 0; i < items.size(); i++) {
+                /*for (int i = 0; i < items.size(); i++) {
                     Log.d("doInBackground", items.get(i).getLink());
-                }
+                }*/
                 episodes = items;
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -193,7 +193,7 @@ public class ItemFragment extends Fragment {
                             currentTag = RSSXMLTag.IGNORETAG;
                         } else if (xmlPullParser.getName().equals("title")) {
                             currentTag = RSSXMLTag.TITLE;
-                        } else if (xmlPullParser.getName().equals("description")) {
+                        } else if (xmlPullParser.getName().equals("itunes:summary")) {
                             currentTag = RSSXMLTag.DESCRIPTION;
                         } else if (xmlPullParser.getName().equals("pubDate")) {
                             currentTag = RSSXMLTag.DATE;

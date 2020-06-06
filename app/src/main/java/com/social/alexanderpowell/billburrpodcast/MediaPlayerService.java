@@ -88,21 +88,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         //registerBecomingNoisyReceiver();
         //Listen for new Audio to play -- BroadcastReceiver
         registerPlayPauseBroadcast();
-
-        /*mHandler = new Handler();
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                //if (mediaPlayer != null) {
-                //currentPosition = mediaPlayer.getCurrentPosition() / 1000;
-                //seekBar.setProgress(currentPosition);
-                //setAudioStats();
-                //}
-                Toast.makeText(getApplicationContext(), "test", Toast.LENGTH_SHORT).show();
-                mHandler.postDelayed(mRunnable,1000);
-            }
-        };
-        mHandler.postDelayed(mRunnable,1000);*/
     }
 
     @Override
@@ -126,9 +111,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setContentTitle("Foreground Service")
-                    .setContentText("Notification Content")
-                    .setContentInfo("Info")
+                    .setContentTitle("Monday Morning Podcast")
+                    //.setContentText("Notification Content")
+                    //.setContentInfo("Info")
                     .setSmallIcon(R.drawable.baseline_play_circle_filled_24)
                     .addAction(R.drawable.baseline_replay_30_24, "Rewind", pendingIntentRewind)
                     .addAction(R.drawable.baseline_play_circle_filled_24, "Play/Pause", pendingIntentPlayPause)

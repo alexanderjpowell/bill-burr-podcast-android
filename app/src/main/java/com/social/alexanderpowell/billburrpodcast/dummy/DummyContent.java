@@ -21,7 +21,7 @@ public class DummyContent {
         }
 
         //new FetchFeedTask().execute((Void) null);
-        Log.d("constructor", "constructor");
+        //Log.d("constructor", "constructor");
     }
 
     private static void addItem(DummyItem item) {

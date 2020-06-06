@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         stopService(serviceIntent);
     }*/
 
-    public void initializeSeekBar() {
+    /*public void initializeSeekBar() {
         seekBar.setMax(duration);
         mRunnable = new Runnable() {
             @Override
@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             }
         };
         mHandler.postDelayed(mRunnable,1000);
-    }
+    }*/
 
     private void setAudioStats() {
         currentDurationTextView.setText(String.valueOf(currentPosition));
@@ -273,6 +273,12 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
             player = binder.getService();
             serviceBound = true;
+
+
+            int dur = player.getDuration() / 1000;
+            seekBar.setMax(dur);
+            remainingDurationTextView.setText(String.valueOf(dur));
+            Toast.makeText(getApplicationContext(), String.valueOf(dur), Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -288,21 +294,22 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             playerIntent.putExtra("media", media);
             startService(playerIntent);
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-            //
             mRunnable = new Runnable() {
                 @Override
                 public void run() {
                     int cur = player.getCurrentPosition() / 1000;
                     int dur = player.getDuration() / 1000;
                     seekBar.setProgress(cur);
-                    currentDurationTextView.setText(String.valueOf(cur));
-                    remainingDurationTextView.setText(String.valueOf(dur));
+                    currentDurationTextView.setText(formatSeconds(cur));
+                    remainingDurationTextView.setText(formatSeconds(dur));
                     mHandler.postDelayed(mRunnable,1000);
                 }
             };
             mHandler.postDelayed(mRunnable,1000);
             //
         } else {
+            // Change SeekBar max
+            seekBar.setMax(player.getDuration() / 1000);
             Toast.makeText(getApplicationContext(), "service already bound", Toast.LENGTH_SHORT).show();
             //Service is active
             //Send media with BroadcastReceiver
@@ -311,6 +318,14 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             broadcastIntent.putExtra("media", media);
             sendBroadcast(broadcastIntent);
         }
+    }
+
+    public static String formatSeconds(int seconds) {
+        int p1 = seconds % 60;
+        int p2 = seconds / 60;
+        int p3 = p2 % 60;
+        p2 = p2 / 60;
+        return p2 + ":" + p3 + ":" + p1;
     }
 
     @Override
