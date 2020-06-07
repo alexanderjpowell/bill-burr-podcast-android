@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.chip.Chip;
 import com.social.alexanderpowell.billburrpodcast.ItemFragment.OnListFragmentInteractionListener;
@@ -47,7 +48,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
+                if (mListener != null) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
                     mListener.onListFragmentInteraction(holder.mItem);
@@ -58,10 +59,19 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         holder.mPlayChip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (null != mListener) {
+                if (mListener != null) {
                     //Toast.makeText(context, "Click", Toast.LENGTH_LONG).show();
                     MainActivity.expandBottomSheet();
                     ((MainActivity)view.getContext()).playAudio(mValues.get(position).getUrl(), mValues.get(position).getTitle());
+                }
+            }
+        });
+
+        holder.mSaveChip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    Toast.makeText(context, "Feature coming soon", Toast.LENGTH_SHORT).show();
                 }
             }
         });
