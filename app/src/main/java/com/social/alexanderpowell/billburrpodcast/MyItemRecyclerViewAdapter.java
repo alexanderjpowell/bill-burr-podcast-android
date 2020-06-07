@@ -61,7 +61,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
                 if (null != mListener) {
                     //Toast.makeText(context, "Click", Toast.LENGTH_LONG).show();
                     MainActivity.expandBottomSheet();
-                    ((MainActivity)view.getContext()).playAudio(mValues.get(position).getUrl());
+                    ((MainActivity)view.getContext()).playAudio(mValues.get(position).getUrl(), mValues.get(position).getTitle());
                 }
             }
         });

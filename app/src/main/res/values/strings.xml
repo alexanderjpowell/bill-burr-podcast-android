@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BillBurrPodcast</string>
+    <string name="app_name">Bill Burr Podcast</string>
     <string name="bottom_sheet_behavior">com.google.android.material.bottomsheet.BottomSheetBehavior</string>
 
     <string name="play_text">Play</string>

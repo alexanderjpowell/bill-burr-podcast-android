@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -16,19 +15,10 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
-import android.util.Xml;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,25 +28,13 @@ import android.widget.Toast;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.social.alexanderpowell.billburrpodcast.dummy.DummyContent;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
 
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
     public static final String Broadcast_PLAY_PAUSE = "com.social.alexanderpowell.billburrpodcast.PLAY_PAUSE";
 
-    private TextView currentDurationTextView, remainingDurationTextView;
+    private TextView currentDurationTextView, remainingDurationTextView, episodeTitleTextView;
     private ImageView playPauseButton, previewPlayPauseButton;
     private LinearLayout preview, main;
     private SeekBar seekBar;
@@ -69,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
     private NotificationManagerCompat mNotificationManager;
     private Notification notification;
 
-    private int currentPosition, duration;
+    //private int currentPosition, duration;
 
     private MediaPlayerService player;
     boolean serviceBound = false;
@@ -81,15 +59,13 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         context = getApplicationContext();
 
-        //createNotificationChannel(context);
-
         View bottomSheet = findViewById(R.id.bottom_sheet);
         mBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        //mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         mHandler = new Handler();
 
         currentDurationTextView = findViewById(R.id.current_duration_text_view);
         remainingDurationTextView = findViewById(R.id.remaining_duration_text_view);
+        episodeTitleTextView = findViewById(R.id.episode_title_text_view);
         playPauseButton = findViewById(R.id.play_pause_button);
         previewPlayPauseButton = findViewById(R.id.preview_play_pause_button);
         seekBar = findViewById(R.id.seek_bar);
@@ -126,10 +102,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-        //String url = "https://storage.googleapis.com/exoplayer-test-media-0/play.mp3"; // Short test mp3
-        //String url = "https://dts.podtrac.com/redirect.mp3/chtbl.com/track/9EE2G/pdst.fm/e/rss.art19.com/episodes/9fc0fc76-84b2-4fa0-9ef6-b736412d045b.mp3";
-        //String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
-
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -148,9 +120,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
             }
         });
-
-        //String url = "https://upload.wikimedia.org/wikipedia/commons/6/6c/Grieg_Lyric_Pieces_Kobold.ogg";
-        //playAudio(url);
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
@@ -197,10 +166,10 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         mHandler.postDelayed(mRunnable,1000);
     }*/
 
-    private void setAudioStats() {
+    /*private void setAudioStats() {
         currentDurationTextView.setText(String.valueOf(currentPosition));
         remainingDurationTextView.setText(String.valueOf(duration));
-    }
+    }*/
 
     /*public void playPauseOnClick(View view) {
         if (mediaPlayer.isPlaying()) {
@@ -283,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             int dur = player.getDuration() / 1000;
             seekBar.setMax(dur);
             remainingDurationTextView.setText(String.valueOf(dur));
-            Toast.makeText(getApplicationContext(), String.valueOf(dur), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), String.valueOf(dur), Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -292,7 +261,19 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         }
     };
 
-    public void playAudio(String media) {
+    public String getDateFromTitle(String title) {
+        String[] words = title.split(" ");
+        if (words.length > 0) {
+            return words[words.length - 1];
+        } else {
+            return title;
+        }
+    }
+
+    public void playAudio(String media, String title) {
+        //
+        episodeTitleTextView.setText(getDateFromTitle(title));
+        //
         //Check is service is active
         if (!serviceBound) {
             Intent playerIntent = new Intent(this, MediaPlayerService.class);
@@ -308,6 +289,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
                     currentDurationTextView.setText(formatSeconds(cur));
                     remainingDurationTextView.setText(formatSeconds(dur));
                     mHandler.postDelayed(mRunnable,1000);
+                    //Toast.makeText(getApplicationContext(), "runnable", Toast.LENGTH_SHORT).show();
                 }
             };
             mHandler.postDelayed(mRunnable,1000);
@@ -315,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         } else {
             // Change SeekBar max
             seekBar.setMax(player.getDuration() / 1000);
-            Toast.makeText(getApplicationContext(), "service already bound", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "service already bound", Toast.LENGTH_SHORT).show();
             //Service is active
             //Send media with BroadcastReceiver
             Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);

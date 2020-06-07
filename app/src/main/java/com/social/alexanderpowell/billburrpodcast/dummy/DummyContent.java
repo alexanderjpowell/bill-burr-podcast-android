@@ -58,7 +58,11 @@ public class DummyContent {
         }
 
         public String getUrl() {
-            return url;
+            return this.url;
+        }
+
+        public String getTitle() {
+            return this.title;
         }
 
         @Override

@@ -19,10 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.core.app.NotificationCompat;
-
-import java.io.Console;
 import java.io.IOException;
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener,
@@ -48,6 +45,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private Handler mHandler;
     private Runnable mRunnable;
     //
+
+    private Notification notification;
+
+    private PendingIntent pendingIntentPlayPause;
 
     // Binder given to clients
     private final IBinder iBinder = new LocalBinder();
@@ -99,7 +100,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             Intent notificationIntent1 = new Intent(this, MediaPlayerService.class);
             notificationIntent1.setAction(NOTIFICATION_ACTION_PLAY_PAUSE);
-            PendingIntent pendingIntentPlayPause = PendingIntent.getService(this, 0, notificationIntent1, 0);
+            pendingIntentPlayPause = PendingIntent.getService(this, 0, notificationIntent1, 0);
 
             Intent notificationIntent2 = new Intent(this, MediaPlayerService.class);
             notificationIntent2.setAction(NOTIFICATION_ACTION_REWIND);
@@ -109,14 +110,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             notificationIntent3.setAction(NOTIFICATION_ACTION_FAST_FORWARD);
             PendingIntent pendingIntentFastForward = PendingIntent.getService(this, 0, notificationIntent3, 0);
 
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+            notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                     .setContentTitle("Monday Morning Podcast")
                     //.setContentText("Notification Content")
                     //.setContentInfo("Info")
                     .setSmallIcon(R.drawable.baseline_play_circle_filled_24)
                     .addAction(R.drawable.baseline_replay_30_24, "Rewind", pendingIntentRewind)
-                    .addAction(R.drawable.baseline_play_circle_filled_24, "Play/Pause", pendingIntentPlayPause)
+                    .addAction(R.drawable.baseline_pause_circle_filled_24, "Play/Pause", pendingIntentPlayPause)
                     .addAction(R.drawable.baseline_forward_30_24, "Fast Forward", pendingIntentFastForward)
                     .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                             .setShowActionsInCompactView(0, 1, 2))
@@ -287,6 +288,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             resumePosition = mediaPlayer.getCurrentPosition();
+            //
+            notification.actions[1] = new Notification.Action.Builder(R.drawable.baseline_play_circle_filled_24, "Play/Pause", pendingIntentPlayPause).build();
+            //notification.actions[1] = new NotificationCompat.Action(R.drawable.baseline_play_circle_filled_24, "Play/Pause", pendingIntentPlayPause);
+            startForeground(NOTIFICATION_ID, notification);
+            //
         }
     }
 
@@ -294,6 +300,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(resumePosition);
             mediaPlayer.start();
+            //
+            notification.actions[1] = new Notification.Action.Builder(R.drawable.baseline_pause_circle_filled_24, "Play/Pause", pendingIntentPlayPause).build();
+            startForeground(NOTIFICATION_ID, notification);
+            //
         }
     }
 
@@ -323,6 +333,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             mediaPlayer.release();
         }
         removeAudioFocus();
+        unregisterReceiver(playPauseReceiver);
     }
 
     private BroadcastReceiver playPauseReceiver = new BroadcastReceiver() {
@@ -345,7 +356,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 mediaFile = intent.getStringExtra("media");
                 initMediaPlayer();
             } else {
-                Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), intent.getAction(), Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -379,6 +390,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         return mediaPlayer.getDuration();
     }
 
-    public String getStats() {return "";}
+    public String getStats() {
+        return "";
+    }
 
 }
