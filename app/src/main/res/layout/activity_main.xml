@@ -58,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/baseline_pause_circle_filled_white_24"
-                    android:onClick="playPauseOnClickPreview"/>
+                    android:onClick="playPauseOnClick"/>
 
             </LinearLayout>
 

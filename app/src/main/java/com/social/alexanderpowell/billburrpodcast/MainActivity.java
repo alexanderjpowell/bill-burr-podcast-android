@@ -231,9 +231,14 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         sendBroadcast(broadcastIntent);
 
         if (serviceBound) {
-            int cur = player.getCurrentPosition();
-            //Log.d("MainActivity", String.valueOf(cur));
-            //Toast.makeText(getApplicationContext(), String.valueOf(cur), Toast.LENGTH_SHORT).show();
+            //int cur = player.getCurrentPosition();
+            if (player.audioIsPlaying()) {
+                playPauseButton.setImageResource(R.drawable.baseline_play_circle_filled_white_48);
+                previewPlayPauseButton.setImageResource(R.drawable.baseline_play_circle_filled_white_24);
+            } else {
+                playPauseButton.setImageResource(R.drawable.baseline_pause_circle_filled_white_48);
+                previewPlayPauseButton.setImageResource(R.drawable.baseline_pause_circle_filled_white_24);
+            }
         }
     }
 
@@ -354,9 +359,5 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         if (mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
-    }
-
-    public void playPauseOnClickPreview(View view) {
-        Toast.makeText(getApplicationContext(), "clicked", Toast.LENGTH_SHORT).show();
     }
 }
