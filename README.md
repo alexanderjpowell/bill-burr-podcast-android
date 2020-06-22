@@ -1,10 +1,10 @@
 # bill-burr-podcast-android
 
-![alt text](https://github.com/alexanderjpowell/bill-burr-podcast-android/blob/master/screenshots/screenshot1.png)
+<img src="https://github.com/alexanderjpowell/bill-burr-podcast-android/blob/master/screenshots/screenshot1.png" width="250">
 
-![alt text](https://github.com/alexanderjpowell/bill-burr-podcast-android/blob/master/screenshots/screenshot2.png)
+<img src="https://github.com/alexanderjpowell/bill-burr-podcast-android/blob/master/screenshots/screenshot2.png" width="250">
 
-![alt text](https://github.com/alexanderjpowell/bill-burr-podcast-android/blob/master/screenshots/screenshot3.png)
+<img src="https://github.com/alexanderjpowell/bill-burr-podcast-android/blob/master/screenshots/screenshot3.png" width="250">
 
 ###
 
