@@ -145,55 +145,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
-    /*public void stopService(View view) {
-        Intent serviceIntent = new Intent(this, ForegroundService.class);
-        stopService(serviceIntent);
-    }*/
-
-    /*public void initializeSeekBar() {
-        seekBar.setMax(duration);
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                //if (mediaPlayer != null) {
-                    //currentPosition = mediaPlayer.getCurrentPosition() / 1000;
-                    //seekBar.setProgress(currentPosition);
-                    //setAudioStats();
-                //}
-                mHandler.postDelayed(mRunnable,1000);
-            }
-        };
-        mHandler.postDelayed(mRunnable,1000);
-    }*/
-
-    /*private void setAudioStats() {
-        currentDurationTextView.setText(String.valueOf(currentPosition));
-        remainingDurationTextView.setText(String.valueOf(duration));
-    }*/
-
-    /*public void playPauseOnClick(View view) {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            playPauseButton.setImageResource(R.drawable.baseline_play_circle_filled_white_48);
-            // Stop service but keep displaying notification
-            Intent serviceIntent = new Intent(this, ForegroundService.class);
-            stopService(serviceIntent);
-            //
-            mNotificationManager.notify(1, notification);
-            //
-        } else {
-            mediaPlayer.start();
-            playPauseButton.setImageResource(R.drawable.baseline_pause_circle_filled_white_48);
-            // restart the service and dismiss the notification
-            mNotificationManager.cancel(1);
-            //
-            Intent serviceIntent = new Intent(this, ForegroundService.class);
-            serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
-            ContextCompat.startForegroundService(this, serviceIntent);
-            //
-        }
-    }*/
-
     public void playPauseOnClick(View view) {
         Intent broadcastIntent = new Intent(Broadcast_PLAY_PAUSE);
         broadcastIntent.putExtra("ACTION", "PLAY_PAUSE");
@@ -252,7 +203,6 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
             int dur = player.getDuration() / 1000;
             seekBar.setMax(dur);
             remainingDurationTextView.setText(String.valueOf(dur));
-            //Toast.makeText(getApplicationContext(), String.valueOf(dur), Toast.LENGTH_SHORT).show();
         }
 
         @Override

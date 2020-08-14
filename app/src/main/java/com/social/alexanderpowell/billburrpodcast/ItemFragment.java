@@ -34,9 +34,7 @@ import java.util.List;
  */
 public class ItemFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
     //private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private MyItemRecyclerViewAdapter adapter;
@@ -150,9 +148,6 @@ public class ItemFragment extends Fragment {
                 URL url = new URL(urlLink);
                 InputStream inputStream = url.openConnection().getInputStream();
                 List<RssFeedModel> items = parseFeed(inputStream);
-                /*for (int i = 0; i < items.size(); i++) {
-                    Log.d("doInBackground", items.get(i).getLink());
-                }*/
                 episodes = items;
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -228,7 +223,6 @@ public class ItemFragment extends Fragment {
                         }
                     }
                     eventType = xmlPullParser.next();
-                    //count++;
                 }
                 return items;
             } finally {

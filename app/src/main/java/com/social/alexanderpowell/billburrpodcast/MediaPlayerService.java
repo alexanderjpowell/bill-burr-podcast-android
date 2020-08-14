@@ -130,7 +130,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             try {
                 //An audio file is passed to the service through putExtra();
                 mediaFile = intent.getExtras().getString("media");
-                //String action = intent.getStringExtra("action");
             } catch (NullPointerException e) {
                 stopSelf();
             }
@@ -160,10 +159,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void handleIncomingActions(Intent playbackAction) {
+    //private void handleIncomingActions(Intent playbackAction) {
         //pause
         //Toast.makeText(getApplicationContext(), "handleIncomingActions", Toast.LENGTH_SHORT).show();
-    }
+    //}
 
     @Override
     public IBinder onBind(Intent intent) {

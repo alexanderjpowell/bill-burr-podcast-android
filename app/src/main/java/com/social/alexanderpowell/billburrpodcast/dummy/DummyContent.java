@@ -19,9 +19,6 @@ public class DummyContent {
         for (int i = 1; i <= COUNT; i++) {
             addItem(createDummyItem(i));
         }
-
-        //new FetchFeedTask().execute((Void) null);
-        //Log.d("constructor", "constructor");
     }
 
     private static void addItem(DummyItem item) {
